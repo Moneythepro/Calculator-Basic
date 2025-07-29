@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>Xiaomi Style Calculator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#ffffff" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     * {
       box-sizing: border-box;
@@ -138,8 +138,53 @@
     </div>
   </div>
 
-  <script src="calculator.js"></script>
   <script>
+    let display = document.getElementById('display');
+    let result = document.getElementById('result');
+
+    function append(value) {
+      display.value += value;
+      preview();
+    }
+
+    function addOperator(op) {
+      const lastChar = display.value[display.value.length - 1];
+      if (['+', '-', '*', '/', '%'].includes(lastChar)) {
+        display.value = display.value.slice(0, -1) + op;
+      } else {
+        display.value += op;
+      }
+    }
+
+    function clearAll() {
+      display.value = '';
+      result.textContent = '';
+    }
+
+    function backspace() {
+      display.value = display.value.slice(0, -1);
+      preview();
+    }
+
+    function preview() {
+      try {
+        let temp = eval(display.value.replace(/%/g, '/100'));
+        result.textContent = isNaN(temp) ? '' : '= ' + temp;
+      } catch (e) {
+        result.textContent = '';
+      }
+    }
+
+    function calculate() {
+      try {
+        display.value = eval(display.value.replace(/%/g, '/100'));
+        result.textContent = '';
+      } catch (e) {
+        display.value = '';
+        result.textContent = 'Error';
+      }
+    }
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("sw.js")
