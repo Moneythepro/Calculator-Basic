@@ -6,7 +6,6 @@ let expression = '';
 function updateDisplay() {
   display.value = expression;
   try {
-    // Show live result
     const evalResult = Function('"use strict"; return (' + expression + ')')();
     result.textContent = isFinite(evalResult) ? evalResult : '';
   } catch {
@@ -15,17 +14,18 @@ function updateDisplay() {
 }
 
 function append(val) {
-  if (val === '.' && /[^\d.]$|\.\d*$/.test(expression)) return; // Prevent multiple dots
-  if (/^0\d/.test(expression)) expression = expression.replace(/^0+/, ''); // Prevent leading zero
+  if (val === '.' && expression.split(/[\+\-\*\/]/).pop().includes('.')) return;
+  if (val === '0' && expression === '0') return;
+  if ('123456789'.includes(val) && expression === '0') expression = '';
   expression += val;
   updateDisplay();
 }
 
 function addOperator(op) {
-  if (expression === '') return;
+  if (expression === '' && op !== '-') return;
   const lastChar = expression.slice(-1);
-  if ('+-*/'.includes(lastChar)) {
-    expression = expression.slice(0, -1); // Replace last operator
+  if ('+-*/%'.includes(lastChar)) {
+    expression = expression.slice(0, -1);
   }
   expression += op;
   updateDisplay();
@@ -50,5 +50,8 @@ function calculate() {
     expression = '';
     display.value = 'Error';
     result.textContent = '';
+    setTimeout(() => {
+      display.value = '';
+    }, 1500);
   }
 }
