@@ -14,19 +14,24 @@ function updateDisplay() {
 }
 
 function append(val) {
-  if (val === '.' && expression.split(/[\+\-\*\/]/).pop().includes('.')) return;
+  const lastSegment = expression.split(/[\+\-\*\/%]/).pop();
+
+  if (val === '.' && lastSegment.includes('.')) return;
   if (val === '0' && expression === '0') return;
   if ('123456789'.includes(val) && expression === '0') expression = '';
+  
   expression += val;
   updateDisplay();
 }
 
 function addOperator(op) {
   if (expression === '' && op !== '-') return;
+
   const lastChar = expression.slice(-1);
   if ('+-*/%'.includes(lastChar)) {
     expression = expression.slice(0, -1);
   }
+
   expression += op;
   updateDisplay();
 }
@@ -52,6 +57,6 @@ function calculate() {
     result.textContent = '';
     setTimeout(() => {
       display.value = '';
-    }, 1500);
+    }, 1200); // Slightly faster reset
   }
 }
