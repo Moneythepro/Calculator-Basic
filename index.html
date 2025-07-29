@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Simple Calculator</title>
+  <title>iOS-Style Calculator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f0f5;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -14,118 +15,175 @@
     }
 
     .calculator {
-      background: white;
+      background: #fff;
       padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-      width: 280px;
+      border-radius: 30px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      width: 320px;
     }
 
     .display {
       width: 100%;
-      height: 50px;
-      font-size: 24px;
+      height: 60px;
+      font-size: 28px;
       text-align: right;
-      padding: 10px;
-      border: 1px solid #ccc;
-      margin-bottom: 15px;
-      border-radius: 10px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 15px;
+      background: #f7f7f7;
+      margin-bottom: 4px;
       box-sizing: border-box;
+    }
+
+    .result-preview {
+      text-align: right;
+      font-size: 18px;
+      color: #aaa;
+      margin-bottom: 10px;
+      height: 22px;
+      padding-right: 15px;
     }
 
     .buttons {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
+      gap: 12px;
     }
 
     button {
       padding: 20px;
-      font-size: 18px;
+      font-size: 20px;
       border: none;
-      border-radius: 10px;
-      background: #eee;
+      border-radius: 50%;
+      background: #eaeaea;
       cursor: pointer;
       transition: background 0.2s;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     button:hover {
-      background: #ddd;
+      background: #dcdcdc;
     }
 
     button.operator {
-      background: #f9a825;
+      background: #f39c12;
       color: white;
     }
 
     button.operator:hover {
-      background: #f57f17;
+      background: #e67e22;
     }
 
     button.equal {
-      background: #43a047;
+      background: #34c759;
       color: white;
       grid-column: span 2;
+      border-radius: 15px;
     }
 
-    button.equal:hover {
-      background: #2e7d32;
-    }
-
-    button.clear {
-      background: #e53935;
+    button.clear,
+    button.ac {
+      background: #ff3b30;
       color: white;
     }
 
+    button.ac:hover,
     button.clear:hover {
       background: #c62828;
+    }
+
+    button span,
+    button i {
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
   <div class="calculator">
     <input type="text" id="display" class="display" readonly>
+    <div id="result" class="result-preview"></div>
     <div class="buttons">
+      <button onclick="clearAll()" class="ac"><i class="fas fa-power-off"></i></button>
+      <button onclick="backspace()" class="clear"><i class="fas fa-delete-left"></i></button>
+      <button onclick="append('%')"><i class="fas fa-percent"></i></button>
+      <button class="operator" onclick="addOperator('/')"><i class="fas fa-divide"></i></button>
+
       <button onclick="append('7')">7</button>
       <button onclick="append('8')">8</button>
       <button onclick="append('9')">9</button>
-      <button class="operator" onclick="append('/')">÷</button>
+      <button class="operator" onclick="addOperator('*')"><i class="fas fa-xmark"></i></button>
 
       <button onclick="append('4')">4</button>
       <button onclick="append('5')">5</button>
       <button onclick="append('6')">6</button>
-      <button class="operator" onclick="append('*')">×</button>
+      <button class="operator" onclick="addOperator('-')"><i class="fas fa-minus"></i></button>
 
       <button onclick="append('1')">1</button>
       <button onclick="append('2')">2</button>
       <button onclick="append('3')">3</button>
-      <button class="operator" onclick="append('-')">−</button>
+      <button class="operator" onclick="addOperator('+')"><i class="fas fa-plus"></i></button>
 
       <button onclick="append('0')">0</button>
-      <button onclick="append('.')">.</button>
-      <button class="equal" onclick="calculate()">=</button>
-      <button class="operator" onclick="append('+')">+</button>
-
-      <button class="clear" onclick="clearDisplay()" style="grid-column: span 4;">C</button>
+      <button onclick="append('.')"><i class="fas fa-circle"></i></button>
+      <button class="equal" onclick="calculate()"><i class="fas fa-equals"></i></button>
     </div>
   </div>
 
   <script>
     const display = document.getElementById("display");
+    const result = document.getElementById("result");
 
-    function append(value) {
-      display.value += value;
+    let expression = '';
+
+    function updateDisplay() {
+      display.value = expression;
+      try {
+        const output = Function('"use strict"; return (' + expression + ')')();
+        result.textContent = isFinite(output) ? output : '';
+      } catch {
+        result.textContent = '';
+      }
     }
 
-    function clearDisplay() {
-      display.value = '';
+    function append(val) {
+      if (val === '.' && /\.\d*$/.test(expression)) return;
+      if (/^0\d/.test(expression)) expression = expression.replace(/^0+/, '');
+      expression += val;
+      updateDisplay();
+    }
+
+    function addOperator(op) {
+      if (expression === '') return;
+      const lastChar = expression.slice(-1);
+      if ('+-*/%'.includes(lastChar)) {
+        expression = expression.slice(0, -1);
+      }
+      expression += op;
+      updateDisplay();
+    }
+
+    function clearAll() {
+      expression = '';
+      updateDisplay();
+    }
+
+    function backspace() {
+      expression = expression.slice(0, -1);
+      updateDisplay();
     }
 
     function calculate() {
       try {
-        display.value = eval(display.value);
+        const finalResult = Function('"use strict"; return (' + expression + ')')();
+        expression = String(finalResult);
+        updateDisplay();
       } catch {
+        expression = '';
         display.value = 'Error';
+        result.textContent = '';
       }
     }
   </script>
