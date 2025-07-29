@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <title>Xiaomi Style Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
   <style>
     * {
       box-sizing: border-box;
@@ -136,5 +139,13 @@
   </div>
 
   <script src="calculator.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("sw.js")
+        .then(() => console.log("✅ Service Worker Registered"))
+        .catch((err) => console.error("❌ SW registration failed:", err));
+    }
+  </script>
 </body>
 </html>
