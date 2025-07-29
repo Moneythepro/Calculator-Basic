@@ -141,22 +141,23 @@
     function updateDisplay() {
       display.value = expression;
       try {
-        const output = Function('"use strict"; return (' + expression + ')')();
-        result.textContent = isFinite(output) ? output : '';
+        const evalResult = Function('"use strict"; return (' + expression + ')')();
+        result.textContent = isFinite(evalResult) ? evalResult : '';
       } catch {
         result.textContent = '';
       }
     }
 
     function append(val) {
-      if (val === '.' && /\.\d*$/.test(expression)) return;
-      if (/^0\d/.test(expression)) expression = expression.replace(/^0+/, '');
+      if (val === '.' && expression.split(/[\+\-\*\/]/).pop().includes('.')) return;
+      if (val === '0' && expression === '0') return;
+      if ('123456789'.includes(val) && expression === '0') expression = '';
       expression += val;
       updateDisplay();
     }
 
     function addOperator(op) {
-      if (expression === '') return;
+      if (expression === '' && op !== '-') return;
       const lastChar = expression.slice(-1);
       if ('+-*/%'.includes(lastChar)) {
         expression = expression.slice(0, -1);
@@ -184,6 +185,9 @@
         expression = '';
         display.value = 'Error';
         result.textContent = '';
+        setTimeout(() => {
+          display.value = '';
+        }, 1500);
       }
     }
   </script>
